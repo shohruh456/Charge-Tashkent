@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root { font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif; font-synthesis: none; text-rendering: optimizeLegibility; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+button, a, input, select { -webkit-tap-highlight-color: transparent; }
+button, select { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .6; }
+
+@layer components {
+  .primary-button { @apply inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-extrabold text-white shadow-sm shadow-emerald-500/20 transition hover:bg-emerald-600 active:scale-[.98]; }
+  .secondary-button { @apply inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold transition hover:border-emerald-400 dark:border-white/10 dark:bg-white/5; }
+  .glass-button { @apply inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-extrabold text-white backdrop-blur transition hover:bg-white/20; }
+  .icon-button { @apply grid size-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-emerald-400 hover:text-emerald-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300; }
+  .nav-link { @apply rounded-lg px-3 py-2 text-sm font-bold text-slate-500 transition hover:text-slate-950 dark:text-slate-400 dark:hover:text-white; }
+  .nav-link-active { @apply bg-slate-100 text-slate-950 dark:bg-white/10 dark:text-white; }
+  .field { @apply h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-white/10 dark:bg-white/5; }
+  .filter-pill { @apply rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold text-slate-500 transition hover:border-emerald-400 dark:border-white/10 dark:bg-white/5; }
+  .filter-pill-active { @apply border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-400; }
+  .check-option { @apply flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-bold transition has-checked:border-emerald-400 dark:border-white/10 dark:bg-white/5; }
+  .check-option input { accent-color: #10b981; }
+  .mobile-tab { @apply flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-extrabold transition; }
+  .map-control { @apply grid size-10 place-items-center border-slate-100 transition hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/10; }
+  .panel { @apply rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[.035]; }
+  .page-shell { @apply mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10; }
+  .eyebrow { @apply text-xs font-extrabold uppercase tracking-[.2em] text-emerald-500; }
+  .empty-state { @apply grid min-h-48 place-items-center content-center rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-white/10; }
+}
+
+.scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+.detail-hero { background: radial-gradient(circle at 85% 20%, rgba(16,185,129,.28), transparent 34%), linear-gradient(135deg, #07120d, #123327); }
+.map-canvas .leaflet-container { z-index: 0; font-family: inherit; background: #dfe8df; }
+.map-canvas .leaflet-control-attribution { border-radius: 8px 0 0; background: rgba(255,255,255,.86); font-size: 9px; }
+.dark .map-canvas .leaflet-tile-pane { filter: brightness(.67) saturate(.75) hue-rotate(105deg); }
+.dark .map-canvas .leaflet-control-attribution { background: rgba(7,17,13,.85); color: #94a3b8; }
+.dark .map-canvas .leaflet-control-attribution a { color: #34d399; }
+.station-map-pin { display: grid; width: 42px; height: 42px; place-items: center; border: 4px solid white; border-radius: 50% 50% 50% 8px; color: white; transform: rotate(-45deg); box-shadow: 0 7px 18px rgba(15,23,42,.3); transition: transform .18s ease, filter .18s ease; }
+.station-map-pin > span { transform: rotate(45deg); font-size: 17px; line-height: 1; }
+.station-map-pin.available { background: #10b981; }.station-map-pin.in_use { background: #f59e0b; }.station-map-pin.offline { background: #64748b; }
+.station-map-pin:hover { transform: rotate(-45deg) scale(1.15); filter: brightness(1.05); }
+.user-location-pin { position: relative; display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: rgba(59,130,246,.2); }
+.user-location-pin::before, .user-location-pin::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: rgba(59,130,246,.22); animation: user-pulse 2s ease-out infinite; }
+.user-location-pin::after { animation-delay: .65s; }
+.user-location-pin > span { position: relative; z-index: 2; width: 16px; height: 16px; border: 3px solid white; border-radius: 50%; background: #3b82f6; box-shadow: 0 2px 9px rgba(37,99,235,.6); }
+.site-loader { animation: loader-exit .3s ease 1s forwards; }
+.loader-logo { animation: loader-float 1s ease-in-out infinite alternate; }
+.loader-track span { width: 35%; animation: loader-progress 1s ease-in-out forwards; }
+.page-shell { animation: route-page-enter .42s cubic-bezier(.22, 1, .36, 1) both; }
+::view-transition-old(root) { animation: route-page-leave .24s ease-in both; }
+::view-transition-new(root) { animation: route-page-enter .42s cubic-bezier(.22, 1, .36, 1) both; }
+.spinner { width: 17px; height: 17px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 999px; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes ping { 75%,100% { transform: scale(1.5); opacity:0; } }
+@keyframes user-pulse { 75%,100% { transform: scale(2.25); opacity: 0; } }
+@keyframes loader-float { to { transform: translateY(-6px) rotate(2deg); } }
+@keyframes loader-progress { from { width: 8%; } to { width: 100%; } }
+@keyframes loader-exit { to { opacity: 0; visibility: hidden; } }
+@keyframes route-page-leave { to { opacity: 0; transform: scale(.985); filter: blur(3px); } }
+@keyframes route-page-enter { from { opacity: 0; transform: translateY(22px) scale(.985); filter: blur(3px); } }
+@keyframes toast { from { opacity:0; transform: translateY(12px) scale(.97); } }
+@keyframes pop { from { opacity:0; transform: translateY(10px) scale(.96); } }
+.animate-toast { animation: toast .25s ease-out; }.animate-pop { animation: pop .22s ease-out; }
+
+@media (max-width: 1023px) { .map-canvas { min-height: calc(100vh - 4.5rem); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
