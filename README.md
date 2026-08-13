@@ -12,6 +12,7 @@ A production-ready Demo Day application for discovering and managing EV charging
 - Full client-side CRUD with a Fetch-based data bootstrap and localStorage persistence
 - Validated station form with React Hook Form, Zod, and clear field errors
 - Station detail pages with directions, pricing, port availability, and status updates
+- Persistent driver reviews with 1–5 star ratings and live average score updates
 - Zustand global state for stations, filters, selected station, search, and favorites
 - TanStack Query caching and mutation invalidation
 - English, Russian, and Uzbek using i18next

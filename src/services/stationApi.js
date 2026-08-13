@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'charge-tashkent-stations'
 const DATA_VERSION_KEY = 'charge-tashkent-data-version'
-const DATA_VERSION = '3'
+const DATA_VERSION = '4'
 
 const delay = (ms = 280) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -14,8 +14,8 @@ async function readStored() {
   const savedById = new Map(saved.map((station) => [station.id, station]))
   const defaultIds = new Set(defaults.map((station) => station.id))
   const stations = [
-    ...defaults.map((station) => ({ ...station, ...savedById.get(station.id), queue: savedById.get(station.id)?.queue ?? station.queue ?? 0 })),
-    ...saved.filter((station) => !defaultIds.has(station.id)).map((station) => ({ queue: 0, ...station })),
+    ...defaults.map((station) => ({ ...station, ...savedById.get(station.id), queue: savedById.get(station.id)?.queue ?? station.queue ?? 0, reviews: savedById.get(station.id)?.reviews ?? station.reviews ?? [] })),
+    ...saved.filter((station) => !defaultIds.has(station.id)).map((station) => ({ queue: 0, reviews: [], ...station })),
   ]
   localStorage.setItem(STORAGE_KEY, JSON.stringify(stations))
   localStorage.setItem(DATA_VERSION_KEY, DATA_VERSION)
@@ -33,7 +33,7 @@ export const stationApi = {
   async create(input) {
     await delay()
     const stations = await readStored()
-    const station = { queue: 0, ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString() }
+    const station = { queue: 0, reviews: [], ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString() }
     write([...stations, station])
     return station
   },
