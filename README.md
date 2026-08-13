@@ -17,11 +17,12 @@ A production-ready Demo Day application for discovering and managing EV charging
 - English, Russian, and Uzbek using i18next
 - Persistent light/dark themes
 - Loading skeletons, empty/error states, reduced-motion support, and toast notifications
+- Headless UI component library: accessible animated `Dialog` and keyboard-friendly `Listbox`
 - Custom 404 page
 
 ## Tech stack
 
-React 19, Vite 8, React Router, Tailwind CSS 4, Zustand, TanStack Query, React Hook Form, Zod, i18next, and Lucide React.
+React 19, Vite 8, React Router, Tailwind CSS 4, Headless UI, Zustand, TanStack Query, React Hook Form, Zod, i18next, and Lucide React.
 
 ## Routes
 
