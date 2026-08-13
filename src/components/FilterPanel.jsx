@@ -9,10 +9,10 @@ export function FilterPanel({ expanded, onToggle }) {
   const { t } = useTranslation()
   const { networks, connectors, status, toggleNetwork, toggleConnector, setStatus, clearFilters } = useStationStore()
   return (
-    <section className="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+    <section className="border-b border-slate-200 px-4 py-3 dark:border-white/10 sm:px-5 sm:py-4">
       <div className="flex items-center justify-between">
-        <button onClick={onToggle} className="flex items-center gap-2 text-sm font-extrabold"><SlidersHorizontal size={17} /> {t('filters')} <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] text-white">{networks.length + connectors.length + (status !== 'all' ? 1 : 0)}</span></button>
-        <button onClick={clearFilters} className="flex items-center gap-1 text-xs font-bold text-slate-400 transition hover:text-emerald-600"><RotateCcw size={13} /> {t('reset')}</button>
+        <button onClick={onToggle} className="flex min-h-10 items-center gap-2 text-sm font-extrabold"><SlidersHorizontal size={17} /> {t('filters')} <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] text-white">{networks.length + connectors.length + (status !== 'all' ? 1 : 0)}</span></button>
+        <button onClick={clearFilters} className="flex min-h-10 items-center gap-1 text-xs font-bold text-slate-400 transition hover:text-emerald-600"><RotateCcw size={13} /> {t('reset')}</button>
       </div>
       <div className={`grid overflow-hidden transition-all duration-300 ${expanded ? 'mt-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
         <div className="min-h-0 space-y-4">

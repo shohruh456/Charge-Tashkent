@@ -33,9 +33,9 @@ export function BookingDialog({ open, onClose, station, onReserve }) {
   return (
     <Dialog open={open} onClose={onClose} className="relative z-[1300]">
       <DialogBackdrop transition className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm duration-300 data-closed:opacity-0" />
-      <div className="fixed inset-0 grid place-items-center overflow-y-auto p-4">
-        <DialogPanel transition className="w-full max-w-lg overflow-hidden rounded-[28px] border border-white/70 bg-white shadow-2xl duration-300 data-closed:translate-y-6 data-closed:scale-95 data-closed:opacity-0 dark:border-white/10 dark:bg-[#102019]">
-          <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-700 p-6 text-white">
+      <div className="fixed inset-0 flex items-end overflow-y-auto sm:grid sm:place-items-center sm:p-4">
+        <DialogPanel transition className="max-h-[92dvh] w-full overflow-y-auto rounded-t-[28px] border border-white/70 bg-white shadow-2xl duration-300 data-closed:translate-y-8 data-closed:opacity-0 dark:border-white/10 dark:bg-[#102019] sm:max-w-lg sm:rounded-[28px] sm:data-closed:scale-95">
+          <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-700 p-5 text-white sm:p-6">
             <div className="absolute -right-8 -top-8 size-32 rounded-full bg-white/10" />
             <button onClick={onClose} className="absolute right-4 top-4 grid size-9 place-items-center rounded-xl bg-white/15 transition hover:bg-white/25" aria-label={t('close')}><X size={18} /></button>
             <div className="grid size-12 place-items-center rounded-2xl bg-white/15"><CalendarClock size={24} /></div>
@@ -43,7 +43,7 @@ export function BookingDialog({ open, onClose, station, onReserve }) {
             <p className="mt-1 text-sm text-emerald-50">{station.name}</p>
           </div>
 
-          <form onSubmit={handleSubmit(onReserve)} className="space-y-5 p-6">
+          <form onSubmit={handleSubmit(onReserve)} className="space-y-4 p-5 pb-[max(20px,env(safe-area-inset-bottom))] sm:space-y-5 sm:p-6">
             <label className="block"><span className="mb-2 flex items-center gap-2 text-xs font-extrabold"><PlugZap size={15} className="text-emerald-500" />{t('connector')}</span><select {...register('connector')} className="field">{station.connectors.map((connector) => <option key={connector}>{connector}</option>)}</select></label>
             <label className="block"><span className="mb-2 flex items-center gap-2 text-xs font-extrabold"><Clock3 size={15} className="text-emerald-500" />{t('startTime')}</span><input {...register('startAt')} min={nextHour()} type="datetime-local" className="field" />{errors.startAt && <span className="mt-1.5 block text-xs font-semibold text-rose-500">{errors.startAt.message}</span>}</label>
             <label className="block"><span className="mb-2 block text-xs font-extrabold">{t('sessionDuration')}</span><select {...register('duration')} className="field"><option value="30">30 {t('minutes')}</option><option value="60">60 {t('minutes')}</option><option value="90">90 {t('minutes')}</option><option value="120">120 {t('minutes')}</option></select></label>

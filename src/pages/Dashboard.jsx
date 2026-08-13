@@ -7,9 +7,11 @@ import { useStationStore } from '../store/useStationStore'
 import { FilterPanel } from '../components/FilterPanel'
 import { StationCard } from '../components/StationCard'
 import { MapCanvas } from '../components/MapCanvas'
+import { MapErrorBoundary } from '../components/MapErrorBoundary'
 import { toast } from '../services/toast'
 
 const distanceToStation = ([latitude, longitude], station) => {
+  if (![latitude, longitude, station.lat, station.lng].every((value) => Number.isFinite(Number(value)))) return Number.POSITIVE_INFINITY
   const toRadians = (value) => value * Math.PI / 180
   const latDelta = toRadians(station.lat - latitude)
   const lngDelta = toRadians(station.lng - longitude)
@@ -18,7 +20,7 @@ const distanceToStation = ([latitude, longitude], station) => {
 }
 
 const bestStationFor = (stations, position) => {
-  const online = stations.filter((station) => station.status !== 'offline')
+  const online = stations.filter((station) => station.status !== 'offline' && Number.isFinite(Number(station.lat)) && Number.isFinite(Number(station.lng)))
   if (!online.length) return null
   const shortestQueue = Math.min(...online.map((station) => station.queue || 0))
   return online
@@ -52,8 +54,8 @@ export function Dashboard() {
     })
     return matching.sort((first, second) => {
       if (sortBy === 'power') return second.power - first.power
-      if (sortBy === 'queue') return (first.queue || 0) - (second.queue || 0) || first.distance - second.distance
-      return first.distance - second.distance
+      if (sortBy === 'queue') return (first.queue || 0) - (second.queue || 0) || (Number(first.distance) || 0) - (Number(second.distance) || 0)
+      return (Number(first.distance) || 0) - (Number(second.distance) || 0)
     })
   }, [stations, query, networks, connectors, status, sortBy])
 
@@ -101,16 +103,16 @@ export function Dashboard() {
   }
 
   return (
-    <div className="relative mx-auto h-[calc(100vh-4.5rem)] max-w-[1600px] overflow-hidden lg:flex">
+    <div className="dashboard-shell relative mx-auto h-[calc(100dvh-4rem)] max-w-[1600px] overflow-hidden sm:h-[calc(100dvh-4.5rem)] lg:flex">
       <aside className={`${sidebarOpen ? 'lg:w-[420px] xl:w-[450px]' : 'lg:w-0'} ${mobileView === 'list' ? 'flex' : 'hidden'} absolute inset-0 z-20 flex-col overflow-hidden bg-[#f8faf9] transition-all duration-300 dark:bg-[#0b1712] lg:static lg:flex lg:shrink-0 lg:border-r lg:border-slate-200 dark:lg:border-white/10`}>
-        <div className="shrink-0 px-5 pb-4 pt-6">
+        <div className="shrink-0 px-4 pb-3 pt-4 sm:px-5 sm:pb-4 sm:pt-6">
           <p className="flex items-center gap-1.5 text-xs font-bold text-emerald-600"><Radio size={14} /> {t('live')}</p>
-          <div className="mt-1 flex items-end justify-between"><h1 className="text-2xl font-black tracking-tight">{t('find')}</h1><p className="text-xs font-semibold text-slate-500"><b className="text-emerald-600">{available}</b> {t('availableNow')}</p></div>
-          <div className="relative mt-4"><Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} className="field pl-11" placeholder={t('search')} /></div>
+          <div className="mt-1 flex items-end justify-between gap-3"><h1 className="text-xl font-black tracking-tight sm:text-2xl">{t('find')}</h1><p className="shrink-0 text-[11px] font-semibold text-slate-500 sm:text-xs"><b className="text-emerald-600">{available}</b> {t('availableNow')}</p></div>
+          <div className="relative mt-3 sm:mt-4"><Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} className="field pl-11" placeholder={t('search')} /></div>
           <button onClick={findBestStation} disabled={isLoading || locatingBest || !stations.length} className="primary-button mt-3 w-full justify-center"><Navigation className={locatingBest ? 'animate-pulse' : ''} size={17} /> {locatingBest ? t('findingBest') : t('bestQueue')}</button>
         </div>
         <FilterPanel expanded={filtersOpen} onToggle={() => setFiltersOpen((value) => !value)} />
-        <div className="relative z-10 flex items-center justify-between px-5 py-3"><p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">{t('stations')} <span className="ml-1 text-slate-900 dark:text-white">{filtered.length}</span></p>
+        <div className="relative z-10 flex items-center justify-between px-4 py-2.5 sm:px-5 sm:py-3"><p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">{t('stations')} <span className="ml-1 text-slate-900 dark:text-white">{filtered.length}</span></p>
           <Listbox value={sortBy} onChange={setSortBy}>
             <ListboxButton className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-bold outline-none transition hover:bg-slate-100 focus:ring-2 focus:ring-emerald-500/30 dark:hover:bg-white/10">{sortOptions.find((option) => option.value === sortBy)?.label}<ChevronDown size={14} /></ListboxButton>
             <ListboxOptions transition anchor="bottom end" className="z-[1000] mt-1 w-44 origin-top-right rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl transition duration-100 ease-out [--anchor-gap:4px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 dark:border-white/10 dark:bg-[#102019]">
@@ -118,7 +120,7 @@ export function Dashboard() {
             </ListboxOptions>
           </Listbox>
         </div>
-        <div className="scrollbar flex-1 space-y-3 overflow-y-auto px-4 pb-24 lg:pb-4">
+        <div className="scrollbar flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 pb-28 sm:px-4 lg:pb-4">
           {isLoading && [...Array(4)].map((_, index) => <div key={index} className="h-28 animate-pulse rounded-2xl bg-slate-200/70 dark:bg-white/5" />)}
           {isError && <div className="empty-state"><p>We couldn’t load the charging network.</p><button onClick={refetch} className="secondary-button mt-3">Try again</button></div>}
           {!isLoading && !isError && filtered.map((station) => <StationCard key={station.id} station={station} active={selectedId === station.id} onSelect={() => { setSelectedId(station.id); setMobileView('map') }} />)}
@@ -126,8 +128,8 @@ export function Dashboard() {
         </div>
       </aside>
       <button onClick={() => setSidebarOpen((value) => !value)} className="absolute left-[420px] top-1/2 z-30 hidden size-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white shadow-lg transition-all dark:border-white/10 dark:bg-[#14231c] lg:grid xl:left-[450px]" style={!sidebarOpen ? { left: 16 } : undefined} aria-label="Toggle sidebar">{sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button>
-      <section className={`${mobileView === 'map' ? 'block' : 'hidden'} h-full flex-1 lg:block`}><MapCanvas stations={filtered} selectedId={selectedId} onSelect={setSelectedId} userPosition={userPosition} onLocationChange={setUserPosition} /></section>
-      <div className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 rounded-2xl bg-slate-950 p-1.5 text-white shadow-2xl lg:hidden"><button onClick={() => setMobileView('list')} className={`mobile-tab ${mobileView === 'list' ? 'bg-white text-slate-950' : ''}`}><List size={16} /> {t('list')}</button><button onClick={() => setMobileView('map')} className={`mobile-tab ${mobileView === 'map' ? 'bg-white text-slate-950' : ''}`}><MapIcon size={16} /> {t('map')}</button></div>
+      <section className={`${mobileView === 'map' ? 'block' : 'hidden'} h-full flex-1 lg:block`}><MapErrorBoundary><MapCanvas stations={filtered} selectedId={selectedId} onSelect={setSelectedId} userPosition={userPosition} onLocationChange={setUserPosition} /></MapErrorBoundary></section>
+      <div className="mobile-view-switch fixed bottom-[max(12px,env(safe-area-inset-bottom))] left-1/2 z-[800] flex w-[calc(100%-24px)] max-w-xs -translate-x-1/2 rounded-2xl bg-slate-950 p-1.5 text-white shadow-2xl lg:hidden"><button onClick={() => setMobileView('list')} className={`mobile-tab flex-1 justify-center ${mobileView === 'list' ? 'bg-white text-slate-950' : ''}`}><List size={16} /> {t('list')}</button><button onClick={() => setMobileView('map')} className={`mobile-tab flex-1 justify-center ${mobileView === 'map' ? 'bg-white text-slate-950' : ''}`}><MapIcon size={16} /> {t('map')}</button></div>
     </div>
   )
 }

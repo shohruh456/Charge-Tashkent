@@ -7,6 +7,9 @@ import { useTranslation } from 'react-i18next'
 import { StatusBadge } from './StatusBadge'
 
 const TASHKENT_CENTER = [41.3111, 69.2797]
+const hasCoordinates = (value) => Array.isArray(value)
+  ? value.length === 2 && value.every((coordinate) => Number.isFinite(Number(coordinate)))
+  : Number.isFinite(Number(value?.lat)) && Number.isFinite(Number(value?.lng))
 
 const markerIcons = {
   available: divIcon({ className: '', html: '<span class="station-map-pin available"><span>⚡</span></span>', iconSize: [44, 50], iconAnchor: [22, 47] }),
@@ -37,11 +40,11 @@ function MapBehaviour({ selected, userPosition, mapRef }) {
   }, [map, mapRef])
 
   useEffect(() => {
-    if (selected) map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), { duration: 0.7 })
+    if (hasCoordinates(selected)) map.flyTo([Number(selected.lat), Number(selected.lng)], Math.max(map.getZoom(), 14), { duration: 0.7 })
   }, [map, selected])
 
   useEffect(() => {
-    if (userPosition) map.flyTo(userPosition, Math.max(map.getZoom(), 14), { duration: 0.9 })
+    if (hasCoordinates(userPosition)) map.flyTo(userPosition.map(Number), Math.max(map.getZoom(), 14), { duration: 0.9 })
   }, [map, userPosition])
 
   return null
@@ -56,7 +59,7 @@ export function MapCanvas({ stations, selectedId, onSelect, userPosition: provid
   const userPosition = providedUserPosition || localUserPosition
   const selected = stations.find((station) => station.id === selectedId)
 
-  const stationMarkers = useMemo(() => stations.map((station) => ({
+  const stationMarkers = useMemo(() => stations.filter(hasCoordinates).map((station) => ({
     ...station,
     icon: markerIcons[station.status] || markerIcons.offline,
   })), [stations])
@@ -97,7 +100,7 @@ export function MapCanvas({ stations, selectedId, onSelect, userPosition: provid
   }
 
   return (
-    <div className="map-canvas relative h-full min-h-[520px] overflow-hidden bg-[#dfe8df] dark:bg-[#14231c]">
+    <div className="map-canvas relative h-full min-h-[420px] overflow-hidden bg-[#dfe8df] dark:bg-[#14231c] sm:min-h-[520px]">
       <MapContainer center={TASHKENT_CENTER} zoom={12} minZoom={10} maxZoom={18} zoomControl={false} className="h-full w-full" preferCanvas>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -114,25 +117,25 @@ export function MapCanvas({ stations, selectedId, onSelect, userPosition: provid
             eventHandlers={{ click: () => onSelect(station.id) }}
           />
         ))}
-        {userPosition && <Marker position={userPosition} icon={userIcon} title="Ваше местоположение" zIndexOffset={1500} />}
+        {hasCoordinates(userPosition) && <Marker position={userPosition.map(Number)} icon={userIcon} title="Ваше местоположение" zIndexOffset={1500} />}
       </MapContainer>
 
-      <div className="pointer-events-none absolute left-4 top-4 z-[500] flex max-w-[calc(100%-6rem)] items-center gap-2 rounded-xl border border-white/80 bg-white/95 px-3 py-2 text-xs font-bold text-slate-700 shadow-lg backdrop-blur dark:border-white/10 dark:bg-[#0b1712]/95 dark:text-white">
+      <div className="pointer-events-none absolute left-3 top-3 z-[500] flex max-w-[calc(100%-5.5rem)] items-center gap-2 rounded-xl border border-white/80 bg-white/95 px-3 py-2 text-[11px] font-bold text-slate-700 shadow-lg backdrop-blur dark:border-white/10 dark:bg-[#0b1712]/95 dark:text-white sm:left-4 sm:top-4 sm:text-xs">
         <span className={`size-2 shrink-0 rounded-full ${locationState === 'found' ? 'bg-blue-500' : locationState === 'locating' ? 'animate-pulse bg-emerald-500' : 'bg-amber-500'}`} />
         <span className="truncate">{locationLabel}</span>
       </div>
 
-      <div className="absolute right-4 top-4 z-[500] flex flex-col overflow-hidden rounded-xl border border-white/80 bg-white shadow-lg dark:border-white/10 dark:bg-[#0b1712]">
+      <div className="absolute right-3 top-3 z-[500] flex flex-col overflow-hidden rounded-xl border border-white/80 bg-white shadow-lg dark:border-white/10 dark:bg-[#0b1712] sm:right-4 sm:top-4">
         <button onClick={() => mapRef.current?.zoomIn()} className="map-control" aria-label="Приблизить карту"><Plus size={18} /></button>
         <button onClick={() => mapRef.current?.zoomOut()} className="map-control border-t" aria-label="Отдалить карту"><Minus size={18} /></button>
         <button onClick={findMe} className={`map-control border-t ${locationState === 'locating' ? 'text-emerald-500' : 'text-blue-500'}`} aria-label="Показать моё местоположение"><LocateFixed className={locationState === 'locating' ? 'animate-pulse' : ''} size={18} /></button>
       </div>
 
-      <div className="pointer-events-none absolute bottom-5 left-4 z-[500] flex gap-2 rounded-xl border border-white/80 bg-white/95 p-2.5 text-[10px] font-bold shadow dark:border-white/10 dark:bg-[#0b1712]/95">
+      <div className="pointer-events-none absolute bottom-5 left-4 z-[500] hidden gap-2 rounded-xl border border-white/80 bg-white/95 p-2.5 text-[10px] font-bold shadow dark:border-white/10 dark:bg-[#0b1712]/95 sm:flex">
         <span className="text-emerald-600">● Available</span><span className="text-amber-500">● In use</span><span className="text-slate-400">● Offline</span>
       </div>
 
-      {selected && <div className="animate-pop absolute bottom-16 right-4 z-[600] w-[calc(100%-2rem)] max-w-xs rounded-2xl border border-white/70 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-[#0b1712]">
+      {selected && <div className="animate-pop absolute bottom-24 left-3 right-3 z-[600] rounded-2xl border border-white/70 bg-white p-3.5 shadow-2xl dark:border-white/10 dark:bg-[#0b1712] sm:bottom-16 sm:left-auto sm:right-4 sm:w-[calc(100%-2rem)] sm:max-w-xs sm:p-4">
         <div className="flex items-start gap-3"><div className="grid size-11 place-items-center rounded-xl bg-emerald-500 text-white"><Zap size={20} fill="currentColor" /></div><div className="min-w-0"><p className="truncate font-extrabold">{selected.name}</p><p className="mt-1 text-xs text-slate-500">{selected.address}</p></div></div>
         <div className="mt-3 flex items-center gap-2"><StatusBadge status={selected.status} compact /><span className="text-xs font-bold">{selected.power} kW</span><span className="ml-auto text-xs text-slate-500">{selected.distance} km</span></div>
         <div className={`mt-3 flex items-center justify-between rounded-xl px-3 py-2 text-xs font-extrabold ${selected.queue ? 'bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-400' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-400'}`}><span>{t('queue')}</span><span>{selected.queue || 0} {t('cars')}</span></div>

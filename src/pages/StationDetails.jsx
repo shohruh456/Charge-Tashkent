@@ -100,20 +100,20 @@ export function StationDetails() {
 
   return (
     <div className="page-shell">
-      <button onClick={() => navigate(-1)} className="mb-6 flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600"><ArrowLeft size={17} /> Back to charging map</button>
+      <button onClick={() => navigate(-1)} className="mb-4 flex min-h-11 items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-600 sm:mb-6"><ArrowLeft size={17} /> Back to charging map</button>
       <div className="grid gap-6 lg:grid-cols-[1.35fr_.65fr]">
         <section>
-          <div className="detail-hero relative overflow-hidden rounded-3xl p-6 text-white sm:p-9">
+          <div className="detail-hero relative overflow-hidden rounded-2xl p-5 text-white sm:rounded-3xl sm:p-9">
             <div className="relative z-10 max-w-2xl">
               <StatusBadge status={station.status} />
               <p className="mt-8 text-sm font-bold text-emerald-300">{station.network} charging network</p>
-              <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-5xl">{station.name}</h1>
+              <h1 className="mt-2 break-words text-2xl font-black tracking-tight sm:text-5xl">{station.name}</h1>
               <p className="mt-4 flex items-center gap-2 text-sm text-white/70"><MapPin size={17} /> {station.address}, {station.district}</p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <button onClick={() => setBookingOpen(true)} className="primary-button"><CalendarClock size={17} />{t('bookCharger')}</button>
-                <a className="glass-button" href={`https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`} target="_blank" rel="noreferrer"><Navigation size={17} /> Get directions</a>
-                <button onClick={() => { navigator.clipboard?.writeText(station.address); toast('Address copied') }} className="glass-button"><Copy size={17} /> Copy address</button>
-                <button onClick={() => toggleFavorite(station.id)} className="glass-button"><Heart size={17} fill={favorite ? 'currentColor' : 'none'} /> {favorite ? 'Saved' : 'Save'}</button>
+              <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-7 sm:flex sm:flex-wrap sm:gap-3">
+                <button onClick={() => setBookingOpen(true)} className="primary-button col-span-2 min-h-12 justify-center sm:col-auto"><CalendarClock size={17} />{t('bookCharger')}</button>
+                <a className="glass-button col-span-2 min-h-11 justify-center sm:col-auto" href={`https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`} target="_blank" rel="noreferrer"><Navigation size={17} /> Get directions</a>
+                <button onClick={() => { navigator.clipboard?.writeText(station.address); toast('Address copied') }} className="glass-button min-h-11 justify-center"><Copy size={17} /> Copy</button>
+                <button onClick={() => toggleFavorite(station.id)} className="glass-button min-h-11 justify-center"><Heart size={17} fill={favorite ? 'currentColor' : 'none'} /> {favorite ? 'Saved' : 'Save'}</button>
               </div>
             </div>
             <Zap className="absolute -bottom-16 -right-12 size-72 rotate-12 text-white/[.04]" fill="currentColor" />
@@ -126,7 +126,7 @@ export function StationDetails() {
             <Metric icon={Star} label={t('rating')} value={`${station.rating} / 5`} />
           </div>
 
-          <div className="panel mt-6 p-6">
+          <div className="panel mt-4 p-4 sm:mt-6 sm:p-6">
             <h2 className="text-lg font-black">Charging points</h2>
             <p className="mt-1 text-sm text-slate-500">Live connector status, refreshed moments ago.</p>
             <div className="mt-5 space-y-3">
@@ -135,12 +135,12 @@ export function StationDetails() {
           </div>
 
           <div className="panel mt-6 overflow-hidden">
-            <div className="border-b border-slate-200 p-6 dark:border-white/10 sm:flex sm:items-center sm:justify-between">
+            <div className="border-b border-slate-200 p-4 dark:border-white/10 sm:flex sm:items-center sm:justify-between sm:p-6">
               <div><p className="eyebrow">{t('stationReviews')}</p><h2 className="mt-2 text-xl font-black">{t('driverFeedback')}</h2></div>
               <div className="mt-4 flex items-center gap-3 sm:mt-0"><b className="text-3xl font-black">{station.rating}</b><div><Stars value={Math.round(station.rating)} /><p className="mt-1 text-[11px] font-bold text-slate-400">{reviews.length} {t('reviewsCount')}</p></div></div>
             </div>
 
-            <form onSubmit={handleSubmit((values) => reviewMutation.mutate(values))} className="grid gap-5 bg-slate-50/70 p-6 dark:bg-white/[.02] sm:grid-cols-2">
+            <form onSubmit={handleSubmit((values) => reviewMutation.mutate(values))} className="grid gap-4 bg-slate-50/70 p-4 dark:bg-white/[.02] sm:grid-cols-2 sm:gap-5 sm:p-6">
               <Field label={t('yourName')} error={errors.name}><div className="relative"><UserRound className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={17} /><input {...register('name')} className="field pl-11" placeholder={t('namePlaceholder')} /></div></Field>
               <Field label={t('yourRating')} error={errors.rating}>
                 <div className="flex h-12 items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 dark:border-white/10 dark:bg-white/5" role="radiogroup" aria-label={t('yourRating')}>
@@ -148,10 +148,10 @@ export function StationDetails() {
                 </div>
               </Field>
               <Field label={t('yourReview')} error={errors.comment} className="sm:col-span-2"><textarea {...register('comment')} className="field min-h-28 resize-y py-3" maxLength={500} placeholder={t('reviewPlaceholder')} /></Field>
-              <div className="sm:col-span-2"><button disabled={reviewMutation.isPending} className="primary-button justify-center"><span>{reviewMutation.isPending ? <span className="spinner" /> : <Send size={17} />}</span>{reviewMutation.isPending ? t('publishing') : t('publishReview')}</button></div>
+              <div className="sm:col-span-2"><button disabled={reviewMutation.isPending} className="primary-button min-h-12 w-full justify-center sm:w-auto"><span>{reviewMutation.isPending ? <span className="spinner" /> : <Send size={17} />}</span>{reviewMutation.isPending ? t('publishing') : t('publishReview')}</button></div>
             </form>
 
-            <div className="space-y-4 p-6">
+            <div className="space-y-4 p-4 sm:p-6">
               {reviews.map((review) => <article key={review.id} className="rounded-2xl border border-slate-200 p-4 dark:border-white/10"><div className="flex items-start gap-3"><div className="grid size-10 shrink-0 place-items-center rounded-full bg-emerald-50 font-black text-emerald-600 dark:bg-emerald-400/10">{review.name.charAt(0).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-x-3 gap-y-1"><h3 className="font-extrabold">{review.name}</h3><Stars value={review.rating} size={14} /><time className="ml-auto text-[11px] font-semibold text-slate-400">{new Date(review.createdAt).toLocaleDateString()}</time></div><p className="mt-2 break-words text-sm leading-relaxed text-slate-600 dark:text-slate-300">{review.comment}</p></div></div></article>)}
               {!reviews.length && <div className="grid min-h-36 place-items-center text-center text-slate-400"><div><MessageSquareText className="mx-auto" size={28} /><p className="mt-3 text-sm font-bold">{t('noReviews')}</p><p className="mt-1 text-xs">{t('firstReview')}</p></div></div>}
             </div>
