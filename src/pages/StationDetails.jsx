@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, BatteryCharging, CarFront, Clock3, Copy, Heart, MapPin, MessageSquareText, Navigation, Send, ShieldCheck, Star, UserRound, Zap } from 'lucide-react'
+import { ArrowLeft, BatteryCharging, CalendarClock, CarFront, CheckCircle2, Clock3, Copy, Heart, MapPin, MessageSquareText, Navigation, Send, ShieldCheck, Star, UserRound, Users, X, Zap } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useForm, useWatch } from 'react-hook-form'
@@ -10,7 +10,10 @@ import { useStations } from '../hooks/useStations'
 import { stationApi } from '../services/stationApi'
 import { useStationStore } from '../store/useStationStore'
 import { StatusBadge } from '../components/StatusBadge'
+import { BookingDialog } from '../components/BookingDialog'
+import { ChargeCalculator } from '../components/ChargeCalculator'
 import { toast } from '../services/toast'
+import { useDriverActivity } from '../hooks/useDriverActivity'
 
 const reviewSchema = z.object({
   name: z.string().trim().min(2, 'Введите минимум 2 символа'),
@@ -24,10 +27,12 @@ export function StationDetails() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { isLoading } = useStations()
+  const [bookingOpen, setBookingOpen] = useState(false)
   const station = useStationStore((state) => state.stations.find((item) => item.id === stationId))
   const favorites = useStationStore((state) => state.favorites)
   const toggleFavorite = useStationStore((state) => state.toggleFavorite)
   const updateStation = useStationStore((state) => state.updateStation)
+  const { reservation, queueEntry, saveReservation, cancelReservation, saveQueueEntry, removeQueueEntry } = useDriverActivity(stationId)
   const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm({
     resolver: zodResolver(reviewSchema),
     defaultValues: { name: '', rating: 5, comment: '' },
@@ -60,6 +65,32 @@ export function StationDetails() {
     onError: () => toast(t('reviewError'), 'error'),
   })
 
+  const queueMutation = useMutation({
+    mutationFn: async (action) => {
+      const queue = action === 'join' ? (station.queue || 0) + 1 : Math.max(0, (station.queue || 0) - 1)
+      const updated = await stationApi.update(stationId, { queue })
+      return { updated, action }
+    },
+    onSuccess: ({ updated, action }) => {
+      updateStation(stationId, { queue: updated.queue })
+      if (action === 'join') {
+        saveQueueEntry(updated.queue)
+        toast(t('joinedQueue'))
+      } else {
+        removeQueueEntry()
+        toast(t('leftQueue'))
+      }
+      queryClient.invalidateQueries({ queryKey: ['stations'] })
+    },
+    onError: () => toast(t('queueError'), 'error'),
+  })
+
+  const reserveCharger = (values) => {
+    saveReservation(values)
+    setBookingOpen(false)
+    toast(t('bookingConfirmed'))
+  }
+
   useEffect(() => { window.scrollTo(0, 0) }, [])
   if (isLoading) return <div className="page-shell"><div className="h-96 animate-pulse rounded-3xl bg-slate-200 dark:bg-white/5" /></div>
   if (!station) return <div className="page-shell text-center"><h1 className="text-3xl font-black">Station not found</h1><Link to="/" className="primary-button mt-5 inline-flex">Back to map</Link></div>
@@ -79,7 +110,8 @@ export function StationDetails() {
               <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-5xl">{station.name}</h1>
               <p className="mt-4 flex items-center gap-2 text-sm text-white/70"><MapPin size={17} /> {station.address}, {station.district}</p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <a className="primary-button" href={`https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`} target="_blank" rel="noreferrer"><Navigation size={17} /> Get directions</a>
+                <button onClick={() => setBookingOpen(true)} className="primary-button"><CalendarClock size={17} />{t('bookCharger')}</button>
+                <a className="glass-button" href={`https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`} target="_blank" rel="noreferrer"><Navigation size={17} /> Get directions</a>
                 <button onClick={() => { navigator.clipboard?.writeText(station.address); toast('Address copied') }} className="glass-button"><Copy size={17} /> Copy address</button>
                 <button onClick={() => toggleFavorite(station.id)} className="glass-button"><Heart size={17} fill={favorite ? 'currentColor' : 'none'} /> {favorite ? 'Saved' : 'Save'}</button>
               </div>
@@ -127,11 +159,25 @@ export function StationDetails() {
         </section>
 
         <aside className="space-y-5">
-          <div className="panel p-6"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-slate-400">Live availability</p><div className="mt-3 flex items-end gap-2"><b className="text-4xl font-black text-emerald-500">{station.availablePorts}</b><span className="mb-1 text-sm text-slate-500">of {station.totalPorts} ports free</span></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-white/5"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${(station.availablePorts / station.totalPorts) * 100}%` }} /></div><div className={`mt-5 flex items-center gap-3 rounded-2xl p-4 ${station.queue ? 'bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-400' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-400'}`}><CarFront size={20} /><span className="text-sm font-bold">{t('queue')}</span><b className="ml-auto text-xl">{station.queue || 0} {t('cars')}</b></div><div className="mt-6 grid grid-cols-3 gap-2">{['available', 'in_use', 'offline'].map((status) => <button disabled={statusMutation.isPending} key={status} onClick={() => statusMutation.mutate({ status })} className={`rounded-xl border px-2 py-2.5 text-xs font-bold capitalize transition ${station.status === status ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-400' : 'border-slate-200 hover:border-emerald-300 dark:border-white/10'}`}>{status.replace('_', ' ')}</button>)}</div></div>
+          {reservation && <div className="booking-ticket relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 to-indigo-800 p-6 text-white shadow-xl shadow-indigo-900/15"><div className="absolute -right-10 -top-10 size-36 rounded-full bg-white/10" /><div className="relative"><div className="flex items-start gap-3"><div className="grid size-11 place-items-center rounded-2xl bg-white/15"><CheckCircle2 size={22} /></div><div><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-violet-200">{t('activeBooking')}</p><h2 className="mt-1 font-black">{new Date(reservation.startAt).toLocaleString()}</h2></div><button onClick={() => { cancelReservation(); toast(t('bookingCancelled')) }} className="ml-auto grid size-8 place-items-center rounded-lg bg-white/10 transition hover:bg-white/20" aria-label={t('cancelBooking')}><X size={15} /></button></div><div className="mt-5 grid grid-cols-2 gap-2"><div className="rounded-xl bg-white/10 p-3"><span className="text-[10px] font-bold text-white/60">{t('connector')}</span><b className="mt-1 block text-sm">{reservation.connector}</b></div><div className="rounded-xl bg-white/10 p-3"><span className="text-[10px] font-bold text-white/60">{t('duration')}</span><b className="mt-1 block text-sm">{reservation.duration} {t('minutes')}</b></div></div></div></div>}
+
+          <div className="panel p-6">
+            <p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-slate-400">Live availability</p>
+            <div className="mt-3 flex items-end gap-2"><b className="text-4xl font-black text-emerald-500">{station.availablePorts}</b><span className="mb-1 text-sm text-slate-500">of {station.totalPorts} ports free</span></div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-white/5"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${(station.availablePorts / station.totalPorts) * 100}%` }} /></div>
+            <div className={`mt-5 rounded-2xl p-4 ${queueEntry ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white' : station.queue ? 'bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-400' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-400'}`}>
+              <div className="flex items-center gap-3"><CarFront size={20} /><span className="text-sm font-bold">{queueEntry ? t('yourQueuePlace') : t('queue')}</span><b className="ml-auto text-xl">{queueEntry ? `#${queueEntry.position}` : `${station.queue || 0} ${t('cars')}`}</b></div>
+              {queueEntry && <p className="mt-2 text-xs font-semibold text-white/80">{t('estimatedWait')}: ~{Math.max(5, (queueEntry.position - 1) * 18)} {t('minutes')}</p>}
+            </div>
+            <button disabled={queueMutation.isPending || station.status === 'offline'} onClick={() => queueMutation.mutate(queueEntry ? 'leave' : 'join')} className={`mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-extrabold transition ${queueEntry ? 'border border-rose-200 text-rose-500 hover:bg-rose-50 dark:border-rose-400/20 dark:hover:bg-rose-400/10' : 'bg-slate-950 text-white hover:bg-emerald-600 dark:bg-white dark:text-slate-950'}`}>{queueMutation.isPending ? <span className="spinner" /> : <Users size={17} />}{queueEntry ? t('leaveQueue') : t('joinQueue')}</button>
+            <div className="mt-6 grid grid-cols-3 gap-2">{['available', 'in_use', 'offline'].map((status) => <button disabled={statusMutation.isPending} key={status} onClick={() => statusMutation.mutate({ status })} className={`rounded-xl border px-2 py-2.5 text-xs font-bold capitalize transition ${station.status === status ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-400' : 'border-slate-200 hover:border-emerald-300 dark:border-white/10'}`}>{status.replace('_', ' ')}</button>)}</div>
+          </div>
           <div className="panel p-6"><h2 className="font-black">Pricing & access</h2><div className="mt-5 space-y-4"><Info label="Energy rate" value={`${station.price.toLocaleString()} UZS / kWh`} /><Info label="Parking" value="Free while charging" /><Info label="Operator" value={station.network} /><Info label="Station ID" value={station.id.slice(0, 12).toUpperCase()} /></div></div>
+          <ChargeCalculator station={station} />
           <div className="rounded-3xl bg-emerald-500 p-6 text-white"><ShieldCheck size={26} /><h2 className="mt-4 text-xl font-black">Verified network</h2><p className="mt-2 text-sm leading-relaxed text-emerald-50">Availability and pricing are supplied directly by the {station.network} network.</p></div>
         </aside>
       </div>
+      <BookingDialog open={bookingOpen} onClose={() => setBookingOpen(false)} station={station} onReserve={reserveCharger} />
     </div>
   )
 }
