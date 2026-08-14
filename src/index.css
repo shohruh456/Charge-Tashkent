@@ -5,8 +5,10 @@
 :root { font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif; font-synthesis: none; text-rendering: optimizeLegibility; color-scheme: light; }
 .dark { color-scheme: dark; }
 * { box-sizing: border-box; }
-html { overflow-x: hidden; }
-body { margin: 0; min-width: 320px; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; overscroll-behavior-y: none; }
+html { min-height: 100%; overflow-x: clip; overflow-y: auto; }
+body { margin: 0; min-width: 320px; min-height: 100vh; min-height: 100dvh; overflow-x: clip; overflow-y: visible; overscroll-behavior-y: auto; }
+#root { min-height: 100vh; min-height: 100dvh; }
+main, .page-shell { touch-action: pan-y pinch-zoom; }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 button, select { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: .6; }
