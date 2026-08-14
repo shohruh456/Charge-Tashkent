@@ -18,7 +18,7 @@ export function ChargeCalculator({ station }) {
   return (
     <div className="panel overflow-hidden">
       <div className="bg-gradient-to-br from-slate-950 to-emerald-950 p-6 text-white">
-        <div className="flex items-center gap-3"><div className="grid size-11 place-items-center rounded-2xl bg-emerald-400/15 text-emerald-300"><BatteryCharging size={22} /></div><div><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-emerald-300">Smart estimate</p><h2 className="text-lg font-black">{t('chargeCalculator')}</h2></div></div>
+        <div className="flex items-center gap-3"><div className="grid size-11 place-items-center rounded-2xl bg-emerald-400/15 text-emerald-300"><BatteryCharging size={22} /></div><div><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-emerald-300">{t('smartEstimate')}</p><h2 className="text-lg font-black">{t('chargeCalculator')}</h2></div></div>
         <div className="mt-5 grid grid-cols-3 gap-2 text-center"><Result icon={Zap} value={`${estimate.energy.toFixed(1)}`} unit="kWh" /><Result icon={Clock3} value={`${estimate.minutes}`} unit={t('minutes')} /><Result icon={Coins} value={`${Math.round(estimate.price / 1000)}k`} unit="UZS" /></div>
       </div>
       <div className="space-y-5 p-6">

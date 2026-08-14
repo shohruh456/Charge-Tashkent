@@ -29,14 +29,13 @@ const bestStationFor = (stations, position) => {
     .sort((first, second) => first.currentDistance - second.currentDistance)[0]
 }
 
-const sortOptions = [
-  { value: 'nearest', label: 'Nearest first' },
-  { value: 'queue', label: 'Shortest queue' },
-  { value: 'power', label: 'Highest power' },
-]
-
 export function Dashboard() {
   const { t } = useTranslation()
+  const sortOptions = [
+    { value: 'nearest', label: t('nearestFirst') },
+    { value: 'queue', label: t('shortestQueue') },
+    { value: 'power', label: t('highestPower') },
+  ]
   const { isLoading, isError, refetch } = useStations()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -68,13 +67,13 @@ export function Dashboard() {
   const openBestStation = (position) => {
     const station = bestStationFor(stations, position)
     if (!station) {
-      toast('Нет работающих станций для выбора', 'error')
+      toast(t('noWorkingStations'), 'error')
       return
     }
     clearFilters()
     setSelectedId(station.id)
     setMobileView('map')
-    toast(`${station.name}: очередь ${station.queue || 0} машин, ${station.currentDistance.toFixed(1)} км от вас`)
+    toast(t('bestStationMessage', { name: station.name, queue: station.queue || 0, distance: station.currentDistance.toFixed(1) }))
   }
 
   const findBestStation = () => {
@@ -83,7 +82,7 @@ export function Dashboard() {
       return
     }
     if (!navigator.geolocation) {
-      toast('Ваш браузер не поддерживает геолокацию', 'error')
+      toast(t('geoUnsupported'), 'error')
       return
     }
     setLocatingBest(true)
@@ -96,7 +95,7 @@ export function Dashboard() {
       },
       () => {
         setLocatingBest(false)
-        toast('Разрешите доступ к геопозиции, чтобы найти станцию', 'error')
+        toast(t('geoPermissionBest'), 'error')
       },
       { enableHighAccuracy: true, timeout: 12_000, maximumAge: 60_000 },
     )
@@ -122,13 +121,13 @@ export function Dashboard() {
         </div>
         <div className="scrollbar flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 pb-28 sm:px-4 lg:pb-4">
           {isLoading && [...Array(4)].map((_, index) => <div key={index} className="h-28 animate-pulse rounded-2xl bg-slate-200/70 dark:bg-white/5" />)}
-          {isError && <div className="empty-state"><p>We couldn’t load the charging network.</p><button onClick={refetch} className="secondary-button mt-3">Try again</button></div>}
+          {isError && <div className="empty-state"><p>{t('loadNetworkError')}</p><button onClick={refetch} className="secondary-button mt-3">{t('tryAgain')}</button></div>}
           {!isLoading && !isError && filtered.map((station) => <StationCard key={station.id} station={station} active={selectedId === station.id} onSelect={() => { setSelectedId(station.id); setMobileView('map') }} />)}
-          {!isLoading && !isError && !filtered.length && <div className="empty-state"><Search size={28} /><p className="mt-2 font-bold">{t('noResults')}</p><p className="mt-1 text-xs">Try clearing one or more filters.</p></div>}
+          {!isLoading && !isError && !filtered.length && <div className="empty-state"><Search size={28} /><p className="mt-2 font-bold">{t('noResults')}</p><p className="mt-1 text-xs">{t('tryClearingFilters')}</p></div>}
         </div>
       </aside>
-      <button onClick={() => setSidebarOpen((value) => !value)} className="absolute left-[420px] top-1/2 z-30 hidden size-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white shadow-lg transition-all dark:border-white/10 dark:bg-[#14231c] lg:grid xl:left-[450px]" style={!sidebarOpen ? { left: 16 } : undefined} aria-label="Toggle sidebar">{sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button>
-      <section className={`${mobileView === 'map' ? 'block' : 'hidden'} h-full flex-1 lg:block`}><MapErrorBoundary><MapCanvas stations={filtered} selectedId={selectedId} onSelect={setSelectedId} userPosition={userPosition} onLocationChange={setUserPosition} /></MapErrorBoundary></section>
+      <button onClick={() => setSidebarOpen((value) => !value)} className="absolute left-[420px] top-1/2 z-30 hidden size-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white shadow-lg transition-all dark:border-white/10 dark:bg-[#14231c] lg:grid xl:left-[450px]" style={!sidebarOpen ? { left: 16 } : undefined} aria-label={t('toggleSidebar')}>{sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button>
+      <section className={`${mobileView === 'map' ? 'block' : 'hidden'} h-full flex-1 lg:block`}><MapErrorBoundary t={t}><MapCanvas stations={filtered} selectedId={selectedId} onSelect={setSelectedId} userPosition={userPosition} onLocationChange={setUserPosition} /></MapErrorBoundary></section>
       <div className="mobile-view-switch fixed bottom-[max(12px,env(safe-area-inset-bottom))] left-1/2 z-[800] flex w-[calc(100%-24px)] max-w-xs -translate-x-1/2 rounded-2xl bg-slate-950 p-1.5 text-white shadow-2xl lg:hidden"><button onClick={() => setMobileView('list')} className={`mobile-tab flex-1 justify-center ${mobileView === 'list' ? 'bg-white text-slate-950' : ''}`}><List size={16} /> {t('list')}</button><button onClick={() => setMobileView('map')} className={`mobile-tab flex-1 justify-center ${mobileView === 'map' ? 'bg-white text-slate-950' : ''}`}><MapIcon size={16} /> {t('map')}</button></div>
     </div>
   )

@@ -17,9 +17,9 @@ export function FilterPanel({ expanded, onToggle }) {
       <div className={`grid overflow-hidden transition-all duration-300 ${expanded ? 'mt-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
         <div className="min-h-0 space-y-4">
           <div>
-            <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[.15em] text-slate-400">Availability</p>
+            <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[.15em] text-slate-400">{t('availability')}</p>
             <div className="flex flex-wrap gap-2">
-              {[['all', 'All'], ['available', 'Available'], ['in_use', 'In use'], ['offline', 'Offline']].map(([value, label]) => <button key={value} onClick={() => setStatus(value)} className={`filter-pill ${status === value ? 'filter-pill-active' : ''}`}>{label}</button>)}
+              {[['all', 'all'], ['available', 'statusAvailable'], ['in_use', 'statusInUse'], ['offline', 'statusOffline']].map(([value, label]) => <button key={value} onClick={() => setStatus(value)} className={`filter-pill ${status === value ? 'filter-pill-active' : ''}`}>{t(label)}</button>)}
             </div>
           </div>
           <div>

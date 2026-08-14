@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { CheckCircle2, X, AlertCircle } from 'lucide-react'
 import { registerToastListener } from '../services/toast'
+import { useTranslation } from 'react-i18next'
 
 export function Toaster() {
+  const { t } = useTranslation()
   const [items, setItems] = useState([])
   const push = useCallback((message, type) => {
     const id = Date.now() + Math.random()
@@ -16,7 +18,7 @@ export function Toaster() {
           <div key={item.id} className="animate-toast flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-[#14231c]">
             {item.type === 'error' ? <AlertCircle className="text-rose-500" /> : <CheckCircle2 className="text-emerald-500" />}
             <span className="flex-1 text-sm font-semibold">{item.message}</span>
-            <button onClick={() => setItems((current) => current.filter(({ id }) => id !== item.id))} aria-label="Dismiss"><X size={16} /></button>
+            <button onClick={() => setItems((current) => current.filter(({ id }) => id !== item.id))} aria-label={t('dismiss')}><X size={16} /></button>
           </div>
         ))}
       </div>

@@ -6,12 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 
-const schema = z.object({
-  connector: z.string().min(1),
-  startAt: z.string().min(1, 'Выберите время'),
-  duration: z.coerce.number().min(30).max(120),
-}).refine(({ startAt }) => new Date(startAt).getTime() > Date.now(), { path: ['startAt'], message: 'Выберите будущее время' })
-
 const nextHour = () => {
   const date = new Date(Date.now() + 60 * 60 * 1000)
   date.setMinutes(0, 0, 0)
@@ -19,10 +13,16 @@ const nextHour = () => {
   return new Date(date.getTime() - offset).toISOString().slice(0, 16)
 }
 
+const createSchema = (t) => z.object({
+  connector: z.string().min(1),
+  startAt: z.string().min(1, t('chooseTime')),
+  duration: z.coerce.number().min(30).max(120),
+}).refine(({ startAt }) => new Date(startAt).getTime() > Date.now(), { path: ['startAt'], message: t('chooseFutureTime') })
+
 export function BookingDialog({ open, onClose, station, onReserve }) {
   const { t } = useTranslation()
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(createSchema(t)),
     defaultValues: { connector: station.connectors[0], startAt: nextHour(), duration: 60 },
   })
 

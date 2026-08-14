@@ -89,10 +89,10 @@ export function MapCanvas({ stations, selectedId, onSelect, userPosition: provid
   }, [findMe])
 
   const locationLabel = {
-    locating: 'Определяем ваше местоположение…',
-    found: 'Ваше местоположение найдено',
-    denied: 'Разрешите доступ к геопозиции',
-    unsupported: 'Геолокация не поддерживается',
+    locating: t('locating'),
+    found: t('locationFound'),
+    denied: t('locationDenied'),
+    unsupported: t('locationUnsupported'),
   }[locationState]
 
   const openStationDetails = () => {
@@ -117,7 +117,7 @@ export function MapCanvas({ stations, selectedId, onSelect, userPosition: provid
             eventHandlers={{ click: () => onSelect(station.id) }}
           />
         ))}
-        {hasCoordinates(userPosition) && <Marker position={userPosition.map(Number)} icon={userIcon} title="Ваше местоположение" zIndexOffset={1500} />}
+        {hasCoordinates(userPosition) && <Marker position={userPosition.map(Number)} icon={userIcon} title={t('yourLocation')} zIndexOffset={1500} />}
       </MapContainer>
 
       <div className="pointer-events-none absolute left-3 top-3 z-[500] flex max-w-[calc(100%-5.5rem)] items-center gap-2 rounded-xl border border-white/80 bg-white/95 px-3 py-2 text-[11px] font-bold text-slate-700 shadow-lg backdrop-blur dark:border-white/10 dark:bg-[#0b1712]/95 dark:text-white sm:left-4 sm:top-4 sm:text-xs">
@@ -126,13 +126,13 @@ export function MapCanvas({ stations, selectedId, onSelect, userPosition: provid
       </div>
 
       <div className="absolute right-3 top-3 z-[500] flex flex-col overflow-hidden rounded-xl border border-white/80 bg-white shadow-lg dark:border-white/10 dark:bg-[#0b1712] sm:right-4 sm:top-4">
-        <button onClick={() => mapRef.current?.zoomIn()} className="map-control" aria-label="Приблизить карту"><Plus size={18} /></button>
-        <button onClick={() => mapRef.current?.zoomOut()} className="map-control border-t" aria-label="Отдалить карту"><Minus size={18} /></button>
-        <button onClick={findMe} className={`map-control border-t ${locationState === 'locating' ? 'text-emerald-500' : 'text-blue-500'}`} aria-label="Показать моё местоположение"><LocateFixed className={locationState === 'locating' ? 'animate-pulse' : ''} size={18} /></button>
+        <button onClick={() => mapRef.current?.zoomIn()} className="map-control" aria-label={t('zoomIn')}><Plus size={18} /></button>
+        <button onClick={() => mapRef.current?.zoomOut()} className="map-control border-t" aria-label={t('zoomOut')}><Minus size={18} /></button>
+        <button onClick={findMe} className={`map-control border-t ${locationState === 'locating' ? 'text-emerald-500' : 'text-blue-500'}`} aria-label={t('showMyLocation')}><LocateFixed className={locationState === 'locating' ? 'animate-pulse' : ''} size={18} /></button>
       </div>
 
       <div className="pointer-events-none absolute bottom-5 left-4 z-[500] hidden gap-2 rounded-xl border border-white/80 bg-white/95 p-2.5 text-[10px] font-bold shadow dark:border-white/10 dark:bg-[#0b1712]/95 sm:flex">
-        <span className="text-emerald-600">● Available</span><span className="text-amber-500">● In use</span><span className="text-slate-400">● Offline</span>
+        <span className="text-emerald-600">● {t('statusAvailable')}</span><span className="text-amber-500">● {t('statusInUse')}</span><span className="text-slate-400">● {t('statusOffline')}</span>
       </div>
 
       {selected && <div className="animate-pop absolute bottom-24 left-3 right-3 z-[600] rounded-2xl border border-white/70 bg-white p-3.5 shadow-2xl dark:border-white/10 dark:bg-[#0b1712] sm:bottom-16 sm:left-auto sm:right-4 sm:w-[calc(100%-2rem)] sm:max-w-xs sm:p-4">
