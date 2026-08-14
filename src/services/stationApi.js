@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'charge-tashkent-stations'
 const DATA_VERSION_KEY = 'charge-tashkent-data-version'
-const DATA_VERSION = '5'
+const DATA_VERSION = '6'
 
 const delay = (ms = 280) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -14,6 +14,7 @@ const normalizeStation = (station) => {
     lat: Number.isFinite(lat) ? lat : 41.3111,
     lng: Number.isFinite(lng) ? lng : 69.2797,
     distance: Number.isFinite(Number(station.distance)) ? Number(station.distance) : 0,
+    approvalStatus: station.approvalStatus || 'approved',
   }
 }
 

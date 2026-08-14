@@ -47,7 +47,7 @@ export function Dashboard() {
   const { stations, query, networks, connectors, status, selectedId, setQuery, setSelectedId, clearFilters } = useStationStore()
 
   const filtered = useMemo(() => {
-    const matching = stations.filter((station) => {
+    const matching = stations.filter((station) => station.approvalStatus !== 'pending' && station.approvalStatus !== 'rejected').filter((station) => {
       const term = query.trim().toLowerCase()
       const matchesQuery = !term || `${station.name} ${station.address} ${station.district} ${station.network}`.toLowerCase().includes(term)
       return matchesQuery && (!networks.length || networks.includes(station.network)) && (!connectors.length || station.connectors.some((item) => connectors.includes(item))) && (status === 'all' || station.status === status)

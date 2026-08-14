@@ -6,6 +6,9 @@ import { Dashboard } from './pages/Dashboard'
 import { StationDetails } from './pages/StationDetails'
 import { ManageStation } from './pages/ManageStation'
 import { NotFound } from './pages/NotFound'
+import { Register } from './pages/Register'
+import { Admin } from './pages/Admin'
+import { RequireAuth } from './components/RequireAuth'
 
 export default function App() {
   const [isBooting, setIsBooting] = useState(true)
@@ -33,7 +36,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/stations/:stationId" element={<StationDetails />} />
-            <Route path="/manage" element={<ManageStation />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/manage" element={<RequireAuth><ManageStation /></RequireAuth>} />
+            <Route path="/admin" element={<RequireAuth role="admin"><Admin /></RequireAuth>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
