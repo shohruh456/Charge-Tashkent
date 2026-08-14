@@ -9,7 +9,7 @@ export const useAuthStore = create(persist((set) => ({
   register: ({ name, email, role = 'user', company = '', phone = '' }) => set({ user: { id: crypto.randomUUID(), name, email: email.toLowerCase(), role, company, phone, createdAt: new Date().toISOString() } }),
   loginAdmin: ({ email, password }) => {
     if (email.toLowerCase() !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) return false
-    set({ user: { id: 'demo-admin', name: 'Charge Admin', email: ADMIN_EMAIL, role: 'admin' } })
+    set({ user: { id: 'charge-admin', name: 'Charge Admin', email: ADMIN_EMAIL, role: 'admin' } })
     return true
   },
   logout: () => set({ user: null }),

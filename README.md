@@ -1,6 +1,6 @@
 # Charge Tashkent
 
-A production-ready Demo Day application for discovering and managing EV charging infrastructure in Tashkent, Uzbekistan. Drivers can search the city, filter local charging networks and connector standards, inspect live availability, save favorites, and open a detailed station view.
+A production-ready application for discovering and managing EV charging infrastructure in Tashkent, Uzbekistan. Drivers can search the city, filter local charging networks and connector standards, inspect live availability, save favorites, and open a detailed station view.
 
 ## Highlights
 
@@ -35,7 +35,7 @@ React 19, Vite 8, React Router, Tailwind CSS 4, Headless UI, Zustand, TanStack Q
 | `/stations/:stationId` | Charging station detail and status update |
 | `/manage` | Add, list, and delete stations |
 | `/business` | Business owner workspace and station submissions |
-| `/register` | User registration and demo administrator login |
+| `/register` | User registration and administrator login |
 | `/admin` | Protected station moderation dashboard |
 | `*` | Custom not-found page |
 
