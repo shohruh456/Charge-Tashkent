@@ -37,7 +37,8 @@ export default function App() {
             <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
             <Route path="/stations/:stationId" element={<RequireAuth><StationDetails /></RequireAuth>} />
             <Route path="/register" element={<Register />} />
-            <Route path="/manage" element={<RequireAuth><ManageStation /></RequireAuth>} />
+            <Route path="/manage" element={<RequireAuth role={['business', 'admin']}><ManageStation /></RequireAuth>} />
+            <Route path="/business" element={<RequireAuth role={['business', 'admin']}><ManageStation /></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth role="admin"><Admin /></RequireAuth>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

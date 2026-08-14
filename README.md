@@ -14,7 +14,7 @@ A production-ready Demo Day application for discovering and managing EV charging
 - Station detail pages with directions, pricing, port availability, and status updates
 - Persistent driver reviews with 1–5 star ratings and live average score updates
 - Charger reservations, persistent personal queue position, wait-time estimates, and a smart cost/time calculator
-- User registration, protected station submissions, and an admin moderation dashboard
+- Driver and business account types, a private owner workspace, protected station submissions, and an admin moderation dashboard
 - Zustand global state for stations, filters, selected station, search, and favorites
 - TanStack Query caching and mutation invalidation
 - English, Russian, and Uzbek using i18next
@@ -34,6 +34,7 @@ React 19, Vite 8, React Router, Tailwind CSS 4, Headless UI, Zustand, TanStack Q
 | `/` | Interactive map and search dashboard |
 | `/stations/:stationId` | Charging station detail and status update |
 | `/manage` | Add, list, and delete stations |
+| `/business` | Business owner workspace and station submissions |
 | `/register` | User registration and demo administrator login |
 | `/admin` | Protected station moderation dashboard |
 | `*` | Custom not-found page |

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
-import { BatteryCharging, Edit3, MapPin, Plus, Trash2, X } from 'lucide-react'
+import { BatteryCharging, Building2, CheckCircle2, Clock3, Edit3, MapPin, Plus, Trash2, X } from 'lucide-react'
 import { stationApi } from '../services/stationApi'
 import { useStations } from '../hooks/useStations'
 import { useStationStore } from '../store/useStationStore'
@@ -33,16 +33,21 @@ export function ManageStation() {
   const [deletingStation, setDeletingStation] = useState(null)
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ resolver: zodResolver(schema), defaultValues: { status: 'available', power: 60 } })
   const visibleStations = user.role === 'admin' ? stations.filter((station) => station.submittedBy) : stations.filter((station) => station.submittedBy?.email === user.email)
+  const approvedCount = visibleStations.filter((station) => station.approvalStatus === 'approved').length
+  const pendingCount = visibleStations.filter((station) => station.approvalStatus === 'pending').length
+  const totalPorts = visibleStations.filter((station) => station.approvalStatus === 'approved').reduce((sum, station) => sum + (station.totalPorts || 0), 0)
   const createMutation = useMutation({ mutationFn: stationApi.create, onSuccess: (station) => { addStation(station); queryClient.invalidateQueries({ queryKey: ['stations'] }); reset(); toast(station.approvalStatus === 'pending' ? 'Заявка отправлена администратору' : `${station.name} added to the map`) }, onError: () => toast('Could not add station', 'error') })
   const deleteMutation = useMutation({ mutationFn: stationApi.remove, onSuccess: (id) => { removeStation(id); setDeletingStation(null); queryClient.invalidateQueries({ queryKey: ['stations'] }); toast('Station deleted') }, onError: () => toast('Could not delete station', 'error') })
   const onSubmit = (values) => {
     const [lat, lng] = districtCoordinates[values.district] || [41.2995, 69.2401]
-    createMutation.mutate({ ...values, connectors: [values.connector], lat, lng, totalPorts: 4, availablePorts: values.status === 'available' ? 3 : 0, price: 1800, hours: '24/7', rating: 5, distance: 2.5, approvalStatus: user.role === 'admin' ? 'approved' : 'pending', submittedBy: { id: user.id, name: user.name, email: user.email } })
+    createMutation.mutate({ ...values, connectors: [values.connector], lat, lng, totalPorts: 4, availablePorts: values.status === 'available' ? 3 : 0, price: 1800, hours: '24/7', rating: 5, distance: 2.5, approvalStatus: user.role === 'admin' ? 'approved' : 'pending', submittedBy: { id: user.id, name: user.name, email: user.email, role: user.role, company: user.company, phone: user.phone } })
   }
 
   return (
     <div className="page-shell">
-      <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow">Station submission</p><h1 className="mt-2 text-2xl font-black tracking-tight sm:text-4xl">Предложить новую станцию</h1><p className="mt-2 text-sm text-slate-500">Здравствуйте, {user.name}. Заполните данные — администратор проверит заявку перед публикацией.</p></div><button onClick={() => setFormOpen((value) => !value)} className="primary-button w-full justify-center sm:w-auto">{formOpen ? <X size={17} /> : <Plus size={17} />}{formOpen ? 'Закрыть форму' : 'Добавить станцию'}</button></div>
+      <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow">Business workspace</p><h1 className="mt-2 text-2xl font-black tracking-tight sm:text-4xl">{user.role === 'admin' ? 'Управление заявками' : user.company || 'Мой зарядный бизнес'}</h1><p className="mt-2 text-sm text-slate-500">Здравствуйте, {user.name}. Добавляйте станции и отслеживайте их публикацию.</p></div><button onClick={() => setFormOpen((value) => !value)} className="primary-button w-full justify-center sm:w-auto">{formOpen ? <X size={17} /> : <Plus size={17} />}{formOpen ? 'Закрыть форму' : 'Добавить станцию'}</button></div>
+      <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3"><BusinessMetric icon={Building2} label="Все объекты" value={visibleStations.length} color="violet" /><BusinessMetric icon={CheckCircle2} label="На карте" value={approvedCount} color="emerald" /><BusinessMetric icon={Clock3} label="Проверяются" value={pendingCount} color="amber" /></div>
+      {totalPorts > 0 && <p className="mt-3 text-right text-xs font-bold text-slate-400">Активных зарядных портов: <b className="text-emerald-500">{totalPorts}</b></p>}
       <div className={`grid transition-all duration-300 ${formOpen ? 'mt-8 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}><div className="min-h-0 overflow-hidden"><form onSubmit={handleSubmit(onSubmit)} className="panel grid gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3 lg:p-7">
         <Field label="Station name" error={errors.name}><input {...register('name')} className="field" placeholder="e.g. Compass Mall Fast Charge" /></Field>
         <Field label="District" error={errors.district}><select {...register('district')} className="field"><option value="">Select district</option>{districts.map((district) => <option key={district}>{district}</option>)}</select></Field>
@@ -78,3 +83,4 @@ export function ManageStation() {
 
 function Field({ label, error, children }) { return <label className="block"><span className="mb-2 block text-xs font-extrabold">{label}</span>{children}{error && <span className="mt-1.5 block text-xs font-semibold text-rose-500">{error.message}</span>}</label> }
 function SubmissionBadge({ status }) { const styles = { pending: 'bg-amber-50 text-amber-600 dark:bg-amber-400/10', approved: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-400/10', rejected: 'bg-rose-50 text-rose-500 dark:bg-rose-400/10' }; const labels = { pending: 'На проверке', approved: 'Одобрено', rejected: 'Отклонено' }; return <span className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[9px] font-extrabold ${styles[status] || styles.pending}`}>{labels[status] || labels.pending}</span> }
+function BusinessMetric({ icon: Icon, label, value, color }) { const styles = { violet: 'bg-violet-50 text-violet-600 dark:bg-violet-400/10', emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-400/10', amber: 'bg-amber-50 text-amber-600 dark:bg-amber-400/10' }; return <div className="panel p-3 sm:p-4"><div className={`grid size-8 place-items-center rounded-lg ${styles[color]}`}><Icon size={16} /></div><b className="mt-3 block text-xl font-black">{value}</b><span className="mt-1 block text-[9px] font-extrabold uppercase tracking-wide text-slate-400 sm:text-[10px]">{label}</span></div> }

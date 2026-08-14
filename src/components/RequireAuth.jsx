@@ -6,6 +6,7 @@ export function RequireAuth({ children, role }) {
   const location = useLocation()
 
   if (!user) return <Navigate to={`/register?next=${encodeURIComponent(location.pathname)}`} replace />
-  if (role && user.role !== role) return <Navigate to="/" replace />
+  const allowedRoles = Array.isArray(role) ? role : role ? [role] : null
+  if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to="/" replace />
   return children
 }
