@@ -14,6 +14,8 @@ A production-ready application for discovering and managing EV charging infrastr
 - Station detail pages with directions, pricing, port availability, and status updates
 - Persistent driver reviews with 1–5 star ratings and live average score updates
 - Charger reservations, persistent personal queue position, wait-time estimates, and a smart cost/time calculator
+- Dedicated favorites and booking pages with routes, station locations, and cancellation controls
+- Persistent notification center with unread badges and optional browser reminders 15 minutes before charging
 - Driver and business account types, a private owner workspace, protected station submissions, and an admin moderation dashboard
 - Zustand global state for stations, filters, selected station, search, and favorites
 - TanStack Query caching and mutation invalidation
@@ -33,6 +35,8 @@ React 19, Vite 8, React Router, Tailwind CSS 4, Headless UI, Zustand, TanStack Q
 | --- | --- |
 | `/` | Interactive map and search dashboard |
 | `/stations/:stationId` | Charging station detail and status update |
+| `/favorites` | Saved charging stations |
+| `/bookings` | Personal bookings, locations, and routes |
 | `/manage` | Add, list, and delete stations |
 | `/business` | Business owner workspace and station submissions |
 | `/register` | User registration and administrator login |
@@ -73,7 +77,7 @@ src/
 
 ## Data and persistence
 
-On first load, `public/stations.json` is read through `fetch()` and copied to the browser under `charge-tashkent-stations`. All create, update, and delete operations update that local dataset. Favorites, theme, and language are persisted separately. To restore the original seed data, remove those keys from the browser's localStorage.
+On first load, `public/stations.json` is read through `fetch()` and copied to the browser under `charge-tashkent-stations`. All create, update, and delete operations update that local dataset. Favorites, bookings, notifications, theme, and language are persisted separately. To restore the original seed data, remove those keys from the browser's localStorage.
 
 The `stationApi` adapter intentionally presents an async API boundary. It can be replaced with REST endpoints without changing the page components or the Zustand store contract.
 

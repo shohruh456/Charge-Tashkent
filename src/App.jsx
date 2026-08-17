@@ -8,7 +8,10 @@ import { ManageStation } from './pages/ManageStation'
 import { NotFound } from './pages/NotFound'
 import { Register } from './pages/Register'
 import { Admin } from './pages/Admin'
+import { Favorites } from './pages/Favorites'
+import { Bookings } from './pages/Bookings'
 import { RequireAuth } from './components/RequireAuth'
+import { BookingReminder } from './components/BookingReminder'
 import { useTranslation } from 'react-i18next'
 
 export default function App() {
@@ -33,11 +36,14 @@ export default function App() {
             </div>
           </div>
         )}
+        <BookingReminder />
         <Header />
         <main>
           <Routes>
             <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
             <Route path="/stations/:stationId" element={<RequireAuth><StationDetails /></RequireAuth>} />
+            <Route path="/favorites" element={<RequireAuth><Favorites /></RequireAuth>} />
+            <Route path="/bookings" element={<RequireAuth><Bookings /></RequireAuth>} />
             <Route path="/register" element={<Register />} />
             <Route path="/manage" element={<RequireAuth role={['business', 'admin']}><ManageStation /></RequireAuth>} />
             <Route path="/business" element={<RequireAuth role={['business', 'admin']}><ManageStation /></RequireAuth>} />
